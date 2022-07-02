@@ -2,9 +2,7 @@ name: fsdl-text-recognizer-2021
 channels:
   - defaults
 dependencies:
-  - python=3.6  # Google Colab is still on Python 3.6
-  - cudatoolkit=10.1
-  - cudnn=7.6
+  - cudnn
   - pip
   - pip:
     - pip-tools

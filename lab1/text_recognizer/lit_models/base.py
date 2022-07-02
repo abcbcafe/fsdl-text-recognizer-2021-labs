@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
 import torch
+import torchmetrics
 
 
 class BaseLitModel(pl.LightningModule):
@@ -14,9 +15,9 @@ class BaseLitModel(pl.LightningModule):
         self.lr = args.lr
         if not args.loss == "transformer":
             self.loss_fn = getattr(torch.nn.functional, args.loss)
-        self.train_acc = pl.metrics.Accuracy()
-        self.val_acc = pl.metrics.Accuracy()
-        self.test_acc = pl.metrics.Accuracy()
+        self.train_acc = torchmetrics.Accuracy()
+        self.val_acc = torchmetrics.Accuracy()
+        self.test_acc = torchmetrics.Accuracy()
 
     @staticmethod
     def add_to_argparse(parser):
