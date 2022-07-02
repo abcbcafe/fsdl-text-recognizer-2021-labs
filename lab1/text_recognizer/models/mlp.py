@@ -6,19 +6,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# FC: Fully connected layer
-FC1_DIM = 1024
-FC2_DIM = 128
-FC3_DIM = 32
-
 
 class MLP(nn.Module):
     """Simple MLP suitable for recognizing single characters."""
 
     def __init__(
-        self,
-        data_config: Dict[str, Any],
-        args: argparse.Namespace = None,
+            self,
+            data_config: Dict[str, Any],
+            args: argparse.Namespace = None,
     ) -> None:
         super().__init__()
         self.args = vars(args) if args is not None else {}
@@ -26,9 +21,10 @@ class MLP(nn.Module):
         input_dim = np.prod(data_config["input_dims"])
         num_classes = len(data_config["mapping"])
 
-        fc1_dim = self.args.get("fc1", FC1_DIM)
-        fc2_dim = self.args.get("fc2", FC2_DIM)
-        fc3_dim = self.args.get("fc3", FC3_DIM)
+        # FC: Fully connected layer
+        fc1_dim = self.args.get("fc1")
+        fc2_dim = self.args.get("fc2")
+        fc3_dim = self.args.get("fc3")
 
         self.dropout = nn.Dropout(0.5)
         self.fc1 = nn.Linear(input_dim, fc1_dim)
@@ -38,15 +34,19 @@ class MLP(nn.Module):
 
     def forward(self, x):
         x = torch.flatten(x, 1)
+
         x = self.fc1(x)
         x = F.relu(x)
         x = self.dropout(x)
+
         x = self.fc2(x)
         x = F.relu(x)
         x = self.dropout(x)
+
         x = self.fc3(x)
         x = F.relu(x)
         x = self.dropout(x)
+
         x = self.fc4(x)
         return x
 
