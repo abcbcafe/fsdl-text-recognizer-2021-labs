@@ -1,50 +1,51 @@
-from typing import Any, Dict
 import argparse
+from typing import Any, Dict
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-FC1_DIM = 1024
-FC2_DIM = 128
-
 
 class MLP(nn.Module):
     """Simple MLP suitable for recognizing single characters."""
 
     def __init__(
-        self,
-        data_config: Dict[str, Any],
-        args: argparse.Namespace = None,
+            self,
+            data_config: Dict[str, Any],
+            args: argparse.Namespace = None,
     ) -> None:
         super().__init__()
         self.args = vars(args) if args is not None else {}
 
-        input_dim = np.prod(data_config["input_dims"])
-        num_classes = len(data_config["mapping"])
-
-        fc1_dim = self.args.get("fc1", FC1_DIM)
-        fc2_dim = self.args.get("fc2", FC2_DIM)
-
+        input_dim = int(np.prod(data_config["input_dims"]))
+        output_dim = len(data_config["mapping"])
         self.dropout = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(input_dim, fc1_dim)
-        self.fc2 = nn.Linear(fc1_dim, fc2_dim)
-        self.fc3 = nn.Linear(fc2_dim, num_classes)
+
+        fcs_dims = self.args.get("fcs_dims").split(",")
+        fcs_dims = [int(d) for d in fcs_dims]
+
+        self.fcs = nn.ModuleList()
+        for i in range(len(fcs_dims)):
+            if i == 0:
+                self.fcs.append(nn.Linear(input_dim, fcs_dims[i]))
+            else:
+                self.fcs.append(nn.Linear(fcs_dims[i - 1], fcs_dims[i]))
+        self.fcs.append(nn.Linear(fcs_dims[-1], output_dim))
+        print(self.fcs)
 
     def forward(self, x):
         x = torch.flatten(x, 1)
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.dropout(x)
-        x = self.fc2(x)
-        x = F.relu(x)
-        x = self.dropout(x)
-        x = self.fc3(x)
+        for i, fc in enumerate(self.fcs):
+            if i < len(self.fcs) - 1:
+                x = F.relu(fc(x))
+                x = self.dropout(x)
+            else:
+                x = fc(x)
         return x
 
     @staticmethod
     def add_to_argparse(parser):
-        parser.add_argument("--fc1", type=int, default=1024)
-        parser.add_argument("--fc2", type=int, default=128)
+        parser.add_argument("--fcs_dims", type=str, default="1024,128,32,32",
+                            help="Comma-separated list of fully connected layer dimensions")
         return parser
