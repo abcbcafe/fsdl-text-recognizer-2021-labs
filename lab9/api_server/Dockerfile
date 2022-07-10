@@ -1,4 +1,4 @@
-# The "buster" flavor of the official docker Python image is based on Debian and includes common packages.
+# The "buster" flavor of the official docker Python image is based on Debian and includes fsdl_common packages.
 FROM python:3.6-buster
 
 # Create the working directory
