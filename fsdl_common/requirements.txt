@@ -1,0 +1,4 @@
+wandb
+smart_open
+h5py
+toml
