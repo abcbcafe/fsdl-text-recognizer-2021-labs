@@ -1,7 +1,8 @@
 import argparse
+
 import pytorch_lightning as pl
 import torch
-
+import torchmetrics
 
 OPTIMIZER = "Adam"
 LR = 1e-3
@@ -9,7 +10,7 @@ LOSS = "cross_entropy"
 ONE_CYCLE_TOTAL_STEPS = 100
 
 
-class Accuracy(pl.metrics.Accuracy):
+class Accuracy(torchmetrics.Accuracy):
     """Accuracy Metric with a hack."""
 
     def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
